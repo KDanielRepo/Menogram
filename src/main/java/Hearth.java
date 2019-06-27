@@ -8,6 +8,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,12 +21,14 @@ import java.util.regex.Pattern;
 
 public class Hearth {
     public void test()throws Exception{
-        System.setProperty("webdriver.gecko.driver","C:\\Users\\NigaKolczan\\Desktop\\geckodriver.exe");
+        System.setProperty("webdriver.gecko.driver","C:\\Users\\Ithilgore\\Desktop\\geckodriver.exe");
         WebDriver webDriver = new FirefoxDriver();
         webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         webDriver.navigate().to("https://www.margonem.pl");
         //List<WebElement> elements = ((FirefoxDriver) webDriver).findElement(By.id("hero"));
         webDriver.findElement(By.className("button-container")).click();
+        //webDriver.navigate().refresh();
+        //Thread.sleep(5000);
         webDriver.findElement(By.className("menu-login")).click();
         webDriver.findElement(By.id("popup-login-input")).sendKeys("mujStary12");
         webDriver.findElement(By.id("popup-login-password")).sendKeys("Testing12");
@@ -34,10 +38,25 @@ public class Hearth {
         System.out.println(webDriver.findElement(By.id("botloc")).getText());
         System.out.println(webDriver.findElement(By.xpath("//tip[contains(@span, '2 lvl')]")).getAttribute("innerHTML"));
         System.out.println(webDriver.findElement(By.id("lagmeter")).getText());
+        Robot robot = new Robot();
+        robot.keyPress(KeyEvent.VK_C);
+        robot.keyRelease(KeyEvent.VK_C);
+        Thread.sleep(200);
+        robot.keyPress(KeyEvent.VK_C);
+        robot.keyRelease(KeyEvent.VK_C);
+        Thread.sleep(200);
+        robot.keyPress(KeyEvent.VK_C);
+        robot.keyRelease(KeyEvent.VK_C);
+        Thread.sleep(200);
+        System.out.println(webDriver.findElement(By.xpath("/div[@id='chat']/div[@id='chatTxtContainer']/div[@id='chattxt']/div[@class='abs']/span[@class='chatmsg']")).getText());
         List<WebElement> elements = webDriver.findElements(By.className("npc"));
         for (WebElement element : elements){
             System.out.println(element);
         }
+        //chat>chatTxtContainer>chattxt>[]>abs>span class"chatmsg">msg</span
+        //gdy wiadomosc priv napisz pondro
+
+
         /*for(WebElement element : elements){
             System.out.println(element);
         }*/
