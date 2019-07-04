@@ -1,8 +1,5 @@
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import lombok.Getter;
+import lombok.Setter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -12,16 +9,16 @@ import org.openqa.selenium.interactions.Actions;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.security.Key;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+@Setter
+@Getter
 public class Hearth {
     String location;
     String x;
@@ -30,17 +27,18 @@ public class Hearth {
     int pozY;
     int enmX = 0;
     int enmY = 0;
-    WebDriver webDriver = new FirefoxDriver();
+    int[][] mapa = new int[96][64];
     Robot robot = new Robot();
 
     public Hearth() throws AWTException {
     }
 
-    public void test()throws Exception {
+
+    public void test() throws Exception {
 
 
         System.setProperty("webdriver.gecko.driver", "C:\\Users\\NigaKolczan\\Desktop\\geckodriver.exe");
-
+        WebDriver webDriver = new FirefoxDriver();
         webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         webDriver.navigate().to("https://www.margonem.pl");
         //List<WebElement> elements = ((FirefoxDriver) webDriver).findElement(By.id("hero"));
@@ -76,154 +74,121 @@ public class Hearth {
             //System.out.println(element.getAttribute("Tip"));
             String enemyY = element.getCssValue("top").replaceAll("\\D+", "");
             enmX = Integer.parseInt(enemyX) / 32;
-            enmY = Integer.parseInt(enemyY) / 48;
-            try{
-                String  testing = element.getAttribute("Tip").replaceAll("\\D+","");
-                if(Integer.parseInt(testing)>3 &Integer.parseInt(testing)<6 ){
+            enmY = Integer.parseInt(enemyY) / 32;
+            try {
+                String testing = element.getAttribute("Tip").replaceAll("\\D+", "");
+                if (Integer.parseInt(testing) > 3 & Integer.parseInt(testing) < 6) {
                     enemyPositionsX.add(enmX);
                     enemyPositionsY.add(enmY);
                 }
-            }catch (NullPointerException | NumberFormatException e){
-                System.out.println("err");
+            } catch (NullPointerException | NumberFormatException e) {
+                //System.out.println("err");
             }
         }
-        for (int i = 0; i<enemyPositionsX.size();i++){
-            System.out.println(enemyPositionsX.get(i)+" "+enemyPositionsY.get(i));
+        for (int i = 0; i < enemyPositionsX.size(); i++) {
+            //System.out.println(enemyPositionsX.get(i) + " " + enemyPositionsY.get(i));
         }
-        while (true){
-            location = webDriver.findElement(By.id("botloc")).getText();
-            x = location.substring(0, 1);
-            pozX = Integer.parseInt(x) * 32;
-            y = location.substring(3, 4);
-            pozY = Integer.parseInt(y) * 48;
-            Actions actions = new Actions(webDriver);
-            if(pozX<enmX&pozY<enmY) {
-                if (enmX - pozX <= 8 & enmY - pozY <= 5) {
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(512 - (enmX * 32), 0 + (enmY * 48)).click().perform();
-                } else{
-                    robot.keyPress(KeyEvent.VK_D);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_D);
-
-                    robot.keyPress(KeyEvent.VK_S);
-                    Thread.sleep(50);
-                    robot.keyRelease(KeyEvent.VK_S);
-                }
-            }
-            if(pozX<enmX&pozY>enmY){
-                if(enmX - pozX <=8 & pozY - enmY <=5){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(512-(enmX*32),512-(enmY*48)).click().perform();
-                }else {
-                    robot.keyPress(KeyEvent.VK_W);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_W);
-
-                    robot.keyPress(KeyEvent.VK_D);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_D);
-                }
-            }
-            if(pozX>enmX&pozY<enmY){
-                if(pozX - enmX <=8 & enmY - pozY <=5){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0+(enmX*32),0+(enmY*48)).click().perform();
-                }else {
-                    robot.keyPress(KeyEvent.VK_S);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_S);
-
-                    robot.keyPress(KeyEvent.VK_A);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_A);
-
-
-                }
-            }
-            if(pozX>enmX&pozY>enmY){
-                if(pozX - enmX <=8 & pozY - enmY <=5){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0+(enmX*32),512-(enmY*48)).click().perform();
-                }else {
-                    robot.keyPress(KeyEvent.VK_W);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_W);
-
-                    robot.keyPress(KeyEvent.VK_A);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_A);
-
-                }
-            }
-            if(pozX==enmX&pozY<enmY){
-                if(enmY - pozY <=5){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0,0+(enmY*48)).click().perform();
-                }else {
-                    robot.keyPress(KeyEvent.VK_S);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_S);
-
-                }
-            }
-            if(pozX==enmX&pozY>enmY){
-                if(pozY-enmY <=5){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0,512-(enmY*48)).click().perform();
-                }else {
-                    robot.keyPress(KeyEvent.VK_W);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_W);
-
-                }
-            }
-            if(pozX<enmX&pozY==enmY){
-                if(enmX - pozX <=8){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(512-(enmX*32),0).click().perform();
-                }else {
-                    robot.keyPress(KeyEvent.VK_D);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_D);
-
-                }
-            }
-            if(pozX>enmX&pozY==enmY){
-                if(pozX-enmX <=8){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0+(enmX*32),0).click().perform();
-                }else {
-                    robot.keyPress(KeyEvent.VK_A);
-                    Thread.sleep(150);
-                    robot.keyRelease(KeyEvent.VK_A);
-
-                }
-            }/*
-            if(pozX < enmX){
-                if(enmX - pozX <=8 & enmY - pozY <=5){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(898-(enmX*32),562-(enmY*48)).click().perform();
-                }
-                if(pozX-enmX <= 8 & pozY - enmY <=5){
-                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(386+(enmX*32),50+(enmY*48)).click().perform();
-                }
-                if(enmX-pozX <= 8 & pozY - enmY <=5){
-
-                }
-                if(pozX-enmX <= 8 & enmY - pozY  <=5){
-
-                }*/
-        }
-    }
-    public void checkBlock()throws InterruptedException{
         location = webDriver.findElement(By.id("botloc")).getText();
-        String  tempX = location.substring(0, 1);
-        int tempPozX = Integer.parseInt(x) * 32;
-        String tempY = location.substring(3, 4);
-        int tempPozY = Integer.parseInt(y) * 48;
-        if (pozX == tempPozX){
-            robot.keyPress(KeyEvent.VK_D);
-            Thread.sleep(200);
-            robot.keyRelease(KeyEvent.VK_D);
+        for(int i = 0; i < location.length();i++){
+            if(location.charAt(i)==44 | i>1){
+                y+=location.charAt(i);
+            }else {
+                x+=location.charAt(i);
+            }
         }
-        if (pozY == tempPozY){
+        x = x.replaceAll("\\D+", "");
+        pozX = Integer.parseInt(x) * 32;
+        y = y.replaceAll("\\D+", "");
+        pozY = Integer.parseInt(y) * 32;
+        System.out.println(Integer.parseInt(x)+" "+Integer.parseInt(y)+" oraz: "+enemyPositionsX.get(0)+" "+enemyPositionsY.get(0));
+        while (enemyPositionsX.size()>0) {
+            Actions actions = new Actions(webDriver);
+            PathFinder pathFinder = new PathFinder(Integer.parseInt(x), Integer.parseInt(y), enemyPositionsX.get(0), enemyPositionsY.get(0));
+            for(int i = pathFinder.getMovesX().size()-1; i>0;i--){
+                /*if (Math.abs(pozX - pathFinder.getMovesX().get(i)) <= 8 & Math.abs(pozY - pathFinder.getMovesY().get(i)) <= 8) {
+                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0 + (pathFinder.getMovesX().get(i) * 32), 0 + (pathFinder.getMovesY().get(i) * 32)).click().perform();
+                    Thread.sleep(100);
+                    pozX = pathFinder.getMovesX().get(i);
+                    pozY = pathFinder.getMovesY().get(i);
+                }*/
+                if(pozX-pathFinder.getMovesX().get(i)<0){
+                    robot.keyPress(KeyEvent.VK_D);
+                    Thread.sleep(200);
+                    robot.keyRelease(KeyEvent.VK_D);
 
+                }else if(pozX-pathFinder.getMovesX().get(i)>0){
+                    robot.keyPress(KeyEvent.VK_A);
+                    Thread.sleep(200);
+                    robot.keyRelease(KeyEvent.VK_A);
+
+                }
+                if(pozY-pathFinder.getMovesY().get(i)<0){
+                    robot.keyPress(KeyEvent.VK_S);
+                    Thread.sleep(200);
+                    robot.keyRelease(KeyEvent.VK_S);
+
+                }else if(pozY-pathFinder.getMovesY().get(i)>0){
+                    robot.keyPress(KeyEvent.VK_W);
+                    Thread.sleep(200);
+                    robot.keyRelease(KeyEvent.VK_W);
+
+                }
+                if(Math.abs(pozX-pathFinder.getMovesX().get(i))==1 && Math.abs(pozY-pathFinder.getMovesY().get(i))==1){
+                    System.out.println("AN GARDE");
+                    robot.keyPress(KeyEvent.VK_E);
+                    Thread.sleep(200);
+                    robot.keyRelease(KeyEvent.VK_E);
+                    Thread.sleep(500);
+                    robot.keyPress(KeyEvent.VK_Z);
+                    Thread.sleep(200);
+                    robot.keyRelease(KeyEvent.VK_Z);
+                }
+                pathFinder.getMovesX().remove(i);
+                pathFinder.getMovesY().remove(i);
+            }
+            location = webDriver.findElement(By.id("botloc")).getText();
+            for(int i = 0; i < location.length();i++){
+                if(location.charAt(i)==44 | i>1){
+                    y+=location.charAt(i);
+                }else {
+                    x+=location.charAt(i);
+                }
+            }
+            x = x.replaceAll("\\D+", "");
+            pozX = Integer.parseInt(x) * 32;
+            y = y.replaceAll("\\D+", "");
+            pozY = Integer.parseInt(y) * 32;
+            enemyPositionsX.remove(0);
+            enemyPositionsY.remove(0);
         }
     }
 
-    //Tutaj odpowiedz na wiadomosc, zostaw to!
+}
+
+
+
+
+
+
+
+
+
+    /*public void checkBlock () throws InterruptedException {
+            location = webDriver.findElement(By.id("botloc")).getText();
+            String tempX = location.substring(0, 1);
+            int tempPozX = Integer.parseInt(x) * 32;
+            String tempY = location.substring(3, 4);
+            int tempPozY = Integer.parseInt(y) * 48;
+            if (pozX == tempPozX) {
+                robot.keyPress(KeyEvent.VK_D);
+                Thread.sleep(200);
+                robot.keyRelease(KeyEvent.VK_D);
+            }
+            if (pozY == tempPozY) {
+
+            }
+        }*/
+//Tutaj odpowiedz na wiadomosc, zostaw to!
 /* while (true){
             try {
                 System.out.println(webDriver.findElement(By.xpath("//div[@id='chat']/div[@id='chatTxtContainer']/div[@id='chattxt']/div[@class='priv2']/span[@class='chatmsg']")).getAttribute("innerHTML"));
@@ -247,29 +212,14 @@ public class Hearth {
         }*/
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //chat>chatTxtContainer>chattxt>[]>abs>span class"chatmsg">msg</span
-        //gdy wiadomosc priv napisz pondro
+//chat>chatTxtContainer>chattxt>[]>abs>span class"chatmsg">msg</span
+//gdy wiadomosc priv napisz pondro
 
 
         /*for(WebElement element : elements){
             System.out.println(element);
         }*/
-        //System.out.println(webDriver.getPageSource());
+//System.out.println(webDriver.getPageSource());
         /* String search;
         WebClient client = new WebClient();
         //client.getOptions().setJavaScriptEnabled(false);
@@ -295,7 +245,6 @@ public class Hearth {
         while ((line = bufferedReader.readLine())!=null){
             System.out.println(line);
         }*/
-    }
     /*public String extract(String a){
         StringBuilder builder = new StringBuilder();
         StringBuilder builder1 = new StringBuilder();
@@ -312,3 +261,136 @@ public class Hearth {
 //centerbox>botloc tip="nazwa mapy">x,y
 //centerbox>battle>
 //centerbox>npcNumerID
+
+/*
+
+} else {
+
+        if (pozX < enmX) {
+        robot.keyPress(KeyEvent.VK_D);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_D);
+        } else if (pozX > enmX) {
+        robot.keyPress(KeyEvent.VK_A);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_A);
+        }
+        if (pozY < enmY) {
+        robot.keyPress(KeyEvent.VK_S);
+        Thread.sleep(50);
+        robot.keyRelease(KeyEvent.VK_S);
+        } else if (pozY > enmY) {
+        robot.keyPress(KeyEvent.VK_W);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_W);
+        }
+        }
+        if (pozX < enmX & pozY < enmY) {
+        if (enmX - pozX <= 8 & enmY - pozY <= 5) {
+        actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(512 - (enmX * 32), 0 + (enmY * 48)).click().perform();
+        } else {
+        robot.keyPress(KeyEvent.VK_D);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_D);
+
+        robot.keyPress(KeyEvent.VK_S);
+        Thread.sleep(50);
+        robot.keyRelease(KeyEvent.VK_S);
+        }
+        }
+        if (pozX < enmX & pozY > enmY) {
+        if (enmX - pozX <= 8 & pozY - enmY <= 5) {
+        actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(512 - (enmX * 32), 512 - (enmY * 48)).click().perform();
+        } else {
+        robot.keyPress(KeyEvent.VK_W);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_W);
+
+        robot.keyPress(KeyEvent.VK_D);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_D);
+        }
+        }
+        if (pozX > enmX & pozY < enmY) {
+        if (pozX - enmX <= 8 & enmY - pozY <= 5) {
+        actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0 + (enmX * 32), 0 + (enmY * 48)).click().perform();
+        } else {
+        robot.keyPress(KeyEvent.VK_S);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_S);
+
+        robot.keyPress(KeyEvent.VK_A);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_A);
+
+
+        }
+        }
+        if (pozX > enmX & pozY > enmY) {
+        if (pozX - enmX <= 8 & pozY - enmY <= 5) {
+        actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0 + (enmX * 32), 512 - (enmY * 48)).click().perform();
+        } else {
+        robot.keyPress(KeyEvent.VK_W);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_W);
+
+        robot.keyPress(KeyEvent.VK_A);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_A);
+
+        }
+        }
+        if (pozX == enmX & pozY < enmY) {
+        if (enmY - pozY <= 5) {
+        actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0, 0 + (enmY * 48)).click().perform();
+        } else {
+        robot.keyPress(KeyEvent.VK_S);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_S);
+
+        }
+        }
+        if (pozX == enmX & pozY > enmY) {
+        if (pozY - enmY <= 5) {
+        actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0, 512 - (enmY * 48)).click().perform();
+        } else {
+        robot.keyPress(KeyEvent.VK_W);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_W);
+
+        }
+        }
+        if (pozX < enmX & pozY == enmY) {
+        if (enmX - pozX <= 8) {
+        actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(512 - (enmX * 32), 0).click().perform();
+        } else {
+        robot.keyPress(KeyEvent.VK_D);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_D);
+
+        }
+        }
+        if (pozX > enmX & pozY == enmY) {
+        if (pozX - enmX <= 8) {
+        actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(0 + (enmX * 32), 0).click().perform();
+        } else {
+        robot.keyPress(KeyEvent.VK_A);
+        Thread.sleep(150);
+        robot.keyRelease(KeyEvent.VK_A);
+
+        }
+        }*/
+/*
+            if(pozX < enmX){
+                if(enmX - pozX <=8 & enmY - pozY <=5){
+                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(898-(enmX*32),562-(enmY*48)).click().perform();
+                }
+                if(pozX-enmX <= 8 & pozY - enmY <=5){
+                    actions.moveToElement(webDriver.findElement(By.id("base"))).moveByOffset(386+(enmX*32),50+(enmY*48)).click().perform();
+                }
+                if(enmX-pozX <= 8 & pozY - enmY <=5){
+
+                }
+                if(pozX-enmX <= 8 & enmY - pozY  <=5){
+
+                }*/
